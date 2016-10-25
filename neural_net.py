@@ -8,6 +8,8 @@ import numpy as np
 #import matplotlib.pyplot as plt
 
 
+# general utility functions
+
 def vect2ind(x):
     '''
     Function to convert boolean vector to index. 
@@ -16,11 +18,10 @@ def vect2ind(x):
         if x[i]:
             return i
 
-# sigmoid function 
+# sigmoid / tanh / linear
 sigmoid = lambda x: 1 / (1 + np.exp(-x))
-
-# linear function 
-linear = lambda w,x: np.dot(w, x)
+tanh    = lambda x: np.tanh(x)
+linear  = lambda w,x: np.dot(w, x)
 
 
 
@@ -35,6 +36,9 @@ class adaline:
     def __init__(self, phi = 'linear'):
         self.phi = phi
     
+    # train neuron 
+    def train(x):
+        return 0
 
 
 
