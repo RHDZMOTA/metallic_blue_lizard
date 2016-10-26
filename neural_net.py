@@ -49,12 +49,10 @@ class adaline:
     desc = 'Adaline: simple neuron.'
     
     # basic information for the neuron
-    def __init__(self, phi = 'linear', w = None,
+    def __init__(self, phi = 'linear',
                  x_data = None, y_data = None):
         # activation function 
         self.phi = phi
-        # initial weights 
-        self.w   = w
         # dataset
         self.x_data = x_data
         self.y_data = y_data
@@ -76,7 +74,7 @@ class adaline:
     
     # simulate resutls
     def evaluate(self, x = False ,retr_n = False):
-        if not x:
+        if not (type(x) != type(False)):
             x = np.matrix(add_ones(self.x_data.copy()))
         else:
             x = np.matrix(add_ones(x.copy()))
@@ -107,29 +105,115 @@ x_d = pd.DataFrame({'x1':np.arange(50)})
 y_d = pd.DataFrame({'y':x_d.apply(lambda x: x[0] * np.random.rand(1)[0], axis = 1)})
 
 # initialize, train and evaluate
-neural_net2 = adaline(x_data = x_d, y_data = y_d) 
-neural_net2.train()
-neural_net2.evaluate()
+neural_net = adaline(x_data = x_d, y_data = y_d) 
+neural_net.train()
+neural_net.evaluate()
 
 # plot results
-plt.plot(neural_net2.x_data, neural_net2.y_data,'b.', neural_net2.x_data, neural_net2.y_estimate, 'r-')
+plt.plot(neural_net.x_data, neural_net.y_data,'b.', neural_net.x_data, neural_net.y_estimate, 'r-')
+    
 
 
+
+def f(x):
+    v = np.sum(x**2)
+    g = 2*x
+    return v,g
+
+x0 = np.array([10, 10, 10])
+minimize(f, x0, method='bfgs', jac = True)
 '''
+
+# error functions
+J_log = lambda y, ye: sum(- y * np.log(ye) - (1-y) * np.log(1-ye))
+# MLE
 
 class simple_logistic:
     '''
     
     '''
     desc = 'Simple logistic regression.'
+    activation_options = ['sigmoid', 'tanh']
+    cost_functions = ['J_log', 'MLE']
     
     # basic information for the neuron
-    def __init__(self, phi = 'sigmoid'):
+    def __init__(self, phi = activation_options[0], cost_f = cost_functions[0],
+                 x_data = None, y_data = None):
+        # activation function 
         self.phi = phi
+        # error function
+        self.cost_f = cost_f
+        # dataset
+        self.x_data = x_data
+        self.y_data = y_data
+    
+    
+    # evaluate cost function 
+    def logistic_cost(self, w):
+        w = np.matrix(w)
+        # transform data to matrix 
+        x = np.matrix(add_ones(self.x_data.copy()))
+        # expected resutls
+        y = np.array(self.y_data.copy())
+        # 
+        v = x * w.T
+        # estimated resutls
+        y_estimate = np.array(eval(self.phi+'(v)'))
+        # error 
+        error = np.matrix(y - y_estimate)
+        # calc. cost func
+        j = eval(self.cost_f+'(y,y_estimate)')[0]
+        # calc. gradient (just for J)
+        dj =  np.array(- error.T * x / x.shape[0])[0]
+        return j, dj
+    
+    # train neuron
+    def train(self):
+        # import optimization package
+        from scipy.optimize import minimize
+        # weights hypothesis
+        self.w = np.zeros(self.x_data.shape[1]+1)
+        # optimize 
+        temp = lambda w: self.logistic_cost(w)
+        self.w = minimize(temp, self.w, method='bfgs', jac = True).x
+    
+    # evaluate neuron
+    def evaluate(self, x = False ,retr_n = False):
+        if not type(x) != type(False):
+            x = np.matrix(add_ones(self.x_data.copy()))
+        else:
+            x = np.matrix(add_ones(x.copy()))
+        w = np.matrix(self.w)
+        v = x * w.T
+        self.probability = pd.DataFrame({'probability':np.array(eval(
+        self.phi+'(v)')).reshape((np.shape(x)[0],))})
+        self.probability['probability'] = self.probability.values.reshape((np.shape(x)[0], ))
+        self.y_estimate = self.probability.apply(lambda x: 1.*(x > 0.5))
+        self.y_estimate = self.y_estimate.rename(columns = {'probability':'y_estimate'})
+        if retr_n:
+            return self.y_estimate
+'''    
+# example 
+x1 = 10 * np.random.rand(100)
+x2 = 20 * np.random.rand(100) + 5
+x_d = pd.DataFrame({'x1':x1, 'x2':x2})
+mask = x_d.x2.values < 17
+y_d = pd.DataFrame({'y':1. * (mask)})
+
+neuron = simple_logistic(x_data = x_d, y_data = y_d)
+neuron.train()
+neuron.evaluate()
+
+# original data
+
+plt.plot(x_d.iloc[mask].x1,x_d.iloc[mask].x2, 'r.',x_d.iloc[mask == 0].x1,x_d.iloc[mask == 0].x2, 'b.' )
+mask2 = neuron.y_estimate.values.reshape((100,))
+#mask2 = np.array(mask2).reshape((100,))
+plt.plot(x_d.iloc[mask2 > 0.5].x1,x_d.iloc[mask2 > 0.5].x2, 'r.',x_d.iloc[mask2 < 0.5].x1,x_d.iloc[mask2 < 0.5].x2, 'b.' )
+'''
 
 
-
-class multiple_logistic: 
+class parallel_logistic: 
     '''
     
     '''
