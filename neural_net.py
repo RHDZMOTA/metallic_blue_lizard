@@ -227,7 +227,7 @@ class competitive_neurons:
     '''
     
     '''
-    desc = 'Competitive Neural Network'
+    desc = 'Competitive Neural Network - Unsupervised Learning'
     
     # basic information for the neural net
     def __init__(self, neurons = 2):
@@ -236,16 +236,29 @@ class competitive_neurons:
 
 
      
-class feed_forward_net:
+class multilayer_perceptron:
     '''
     
     '''
     desc = 'Feed forwatd propagation neural net'
+    activation_options = ['sigmoid', 'tanh']
+    cost_functions = ['J_log', 'MLE']
     
     # basic information for the neural net
-    def __init__(self, hidden_layers = 1, neurons = [1]):
+    def __init__(self, hidden_layers = [3], output_neurons = 1, phi = activation_options[0],
+                 x_data = None, y_data = None, cost_f = cost_functions[0]):
+        # number of hidden layers 
         self.hidden_layers = hidden_layers
-        self.neurons = neurons
-        
+        # number of output neurons
+        self.output_neurons = output_neurons
+        # activation function 
+        self.phi = phi
+        # error function
+        self.cost_f = cost_f
+        # dataset
+        self.x_data = x_data
+        self.y_data = y_data
+    
+    
     
     
