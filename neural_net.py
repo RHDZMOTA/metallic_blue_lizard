@@ -155,6 +155,7 @@ class simple_logistic:
         x = np.matrix(add_ones(self.x_data.copy()))
         # expected resutls
         y = np.array(self.y_data.copy())
+        y = y.reshape((y.shape[0], ))
         # 
         v = x * w.T
         # estimated resutls
