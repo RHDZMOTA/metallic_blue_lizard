@@ -225,17 +225,94 @@ class parallel_logistic:
 
 class competitive_neurons:
     '''
-    
+    Competitive neural network - unsupervised learning
     '''
     desc = 'Competitive Neural Network - Unsupervised Learning'
     
     # basic information for the neural net
-    def __init__(self, neurons = 2):
+    def __init__(self, neurons = 2, x_data = None):
+        # number of neurons 
         self.neurons = neurons
-   
+        # dataset
+        self.x_data = x_data
+        
+    def train(self, set_weights = False, eta = 0.1, max_iter = 200,
+              print_status = False):
+        # dim of the data 
+        dim_data = self.x_data.shape[1]
+        # initial random weights 
+        if set_weights != False:
+            w = set_weights
+        else:
+            w = np.random.rand(dim_data, self.neurons)
+        w = np.asmatrix(w)
+        # data matrix 
+        X = np.asmatrix(self.x_data.values)
+        X = X.T
+        # unsupervised training
+        for i in range(max_iter):
+            for k in range(self.x_data.shape[0]):
+                
+                # distance
+                V = []
+                for j in range(self.neurons):
+                    D = X[:,k] - w[:,j]
+                    V.append(np.asscalar(D.T.dot(D)))
+                
+                # closest neuron 
+                ind = np.argmin(V)
+                
+                # localize neuron 
+                y = np.matlib.zeros((self.neurons, 1))
+                y[ind, :] = 1
+                
+                # update weights 
+                w[:,ind] = w[:, ind] + eta * (X[:, k] - w[:, ind])
+        self.w = w
+    
+    def evaluate(self):
+        # data matrix 
+        X = np.asmatrix(self.x_data.values)
+        X = X.T
+        # output layer
+        y = np.matlib.zeros((self.neurons, self.x_data.shape[0]))
+        # calculate results
+        w = self.w
+        for k in range(self.x_data.shape[0]):
+            # distance
+            V = []
+            for j in range(self.neurons):
+                D = X[:,k] - w[:,j]
+                V.append(np.asscalar(D.T.dot(D)))
+            
+            # closest neuron
+            ind = np.argmin(V)
+            
+            # localize neuron
+            y[ind, k] = 1
+        self.y_vect = y.T.tolist()
+        self.y = pd.DataFrame({'y':[vect2ind(x) for x in self.y_vect]})
+
+'''
+# test
+from scipy.io import loadmat
+m = loadmat('datos2.mat')
+m = m['datos2']
+data = pd.DataFrame(m.T)
+
+cn = competitive_neurons(neurons = 10, x_data = data)
+cn.train()
+cn.evaluate()
+
+print('Neurons that found a cluster: {}'.format(np.unique(cn.y)))
+
+'''
 
 
-     
+
+
+
+
 class multilayer_perceptron:
     '''
     
