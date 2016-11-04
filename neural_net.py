@@ -159,12 +159,14 @@ class simple_logistic:
         v = x * w.T
         # estimated resutls
         y_estimate = np.array(eval(self.phi+'(v)'))
+        y_estimate = y_estimate.reshape((y.shape[0],))
         # error 
         error = np.matrix(y - y_estimate)
+        # np.matrix([np.asscalar(x) for x in error.T])
         # calc. cost func
-        j = eval(self.cost_f+'(y,y_estimate)')[0]
+        j = eval(self.cost_f+'(y,y_estimate)')
         # calc. gradient (just for J)
-        dj =  np.array(- error.T * x / x.shape[0])[0]
+        dj =  np.array(- error * x / x.shape[0])[0]
         return j, dj
     
     # train neuron
@@ -238,6 +240,7 @@ class competitive_neurons:
         
     def train(self, set_weights = False, eta = 0.1, max_iter = 200,
               print_status = False):
+        import numpy.matlib as npm
         # dim of the data 
         dim_data = self.x_data.shape[1]
         # initial random weights 
@@ -263,21 +266,23 @@ class competitive_neurons:
                 ind = np.argmin(V)
                 
                 # localize neuron 
-                y = np.matlib.zeros((self.neurons, 1))
+                y = npm.zeros((self.neurons, 1))
                 y[ind, :] = 1
                 
                 # update weights 
                 w[:,ind] = w[:, ind] + eta * (X[:, k] - w[:, ind])
-        self.w = w
+        self.w_raw = w
+        self.w = pd.DataFrame(w.tolist())
     
-    def evaluate(self):
+    def evaluate(self, print_results = False):
+        import numpy.matlib as npm
         # data matrix 
         X = np.asmatrix(self.x_data.values)
         X = X.T
         # output layer
-        y = np.matlib.zeros((self.neurons, self.x_data.shape[0]))
+        y = npm.zeros((self.neurons, self.x_data.shape[0]))
         # calculate results
-        w = self.w
+        w = self.w_raw
         for k in range(self.x_data.shape[0]):
             # distance
             V = []
@@ -292,6 +297,9 @@ class competitive_neurons:
             y[ind, k] = 1
         self.y_vect = y.T.tolist()
         self.y = pd.DataFrame({'y':[vect2ind(x) for x in self.y_vect]})
+        if print_results:
+            neurons = np.unique(self.y)
+            print('Neurons that found a cluster: {}'.format(neurons))
 
 '''
 # test
