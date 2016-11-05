@@ -298,9 +298,34 @@ class competitive_neurons:
             y[ind, k] = 1
         self.y_vect = y.T.tolist()
         self.y = pd.DataFrame({'y':[vect2ind(x) for x in self.y_vect]})
+        ne_rons = np.unique(self.y)
+        self.clusters = ne_rons 
         if print_results:
-            neurons = np.unique(self.y)
-            print('Neurons that found a cluster: {}'.format(neurons))
+            print('Neurons that found a cluster: {}'.format(ne_rons))
+    
+    def cost_function(self, rt_rn = True):
+        
+        # clusters founded
+        n_urons = self.clusters
+        # initialize sum vector (sum of the distance in cluster)
+        group_sum = np.zeros(len(n_urons))
+        # initialize element vector (number of elements in cluster)
+        group_elm = np.zeros(len(n_urons))
+        
+        for i in range(self.x_data.shape[0]):
+            neurone = np.int(self.y.values[i][0])
+            x = self.x_data.values[0]
+            extract_w = self.w.columns[self.w.columns == neurone]
+            w = np.array(self.w[extract_w].values.T.tolist()[0])
+            group_sum[neurone] = group_sum[neurone] + np.linalg.norm(x - w)
+            group_elm[neurone] = group_elm[neurone] + 1
+        
+        group_mean = group_sum / group_elm
+        j = np.mean(group_mean)
+        self.cost = j
+        if rt_rn:
+            return j
+        
 
 '''
 # test
