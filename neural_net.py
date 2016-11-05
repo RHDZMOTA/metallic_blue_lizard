@@ -314,6 +314,7 @@ class competitive_neurons:
         
         for i in range(self.x_data.shape[0]):
             neurone = np.int(self.y.values[i][0])
+            neurone = vect2ind(n_urons == neurone)
             x = self.x_data.values[0]
             extract_w = self.w.columns[self.w.columns == neurone]
             w = np.array(self.w[extract_w].values.T.tolist()[0])
