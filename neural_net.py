@@ -125,7 +125,15 @@ minimize(f, x0, method='bfgs', jac = True)
 '''
 
 # error functions
-J_log = lambda y, ye: sum(- y * np.log(ye) - (1-y) * np.log(1-ye))
+#J_log = lambda y, ye: sum(- y * np.log(ye) - (1-y) * np.log(1-ye))
+def J_log(y, ye):
+    jl = 0
+    for i, j in zip(y, ye):
+        if i == 0.:
+            jl = jl - np.log(1-j)
+        if i == 1.:
+            jl = jl - np.log(j)
+    return j 
 # MLE
 
 class simple_logistic:
