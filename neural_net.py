@@ -15,6 +15,11 @@ import pandas as pd
 
 # general utility functions
 
+def perform(y, ye):
+    err = y - ye
+    err = np.matrix(err)
+    return np.array(err * err.T / len(y)).reshape(1,)[0]
+
 def vect2ind(x):
     '''
     Function to convert boolean vector to index. 
@@ -125,15 +130,41 @@ minimize(f, x0, method='bfgs', jac = True)
 '''
 
 # error functions
-#J_log = lambda y, ye: sum(- y * np.log(ye) - (1-y) * np.log(1-ye))
+'''
+def ln_ye(ye):
+    rtn = ye
+    mask = (ye == 0.)
+    rtn[mask] = np.float('inf')
+    rtn[mask == False] = np.log(ye[mask == False])
+    return ye
+
+def ln_1_ye(ye):
+    rtn = 1-ye
+    mask = (1-ye) == 0.
+    rtn[mask] = np.float('inf')
+    rtn[mask == False] = np.log(1-ye[mask == False])
+    return rtn
+
+J_log = lambda y, ye: sum(- y * ln_ye(ye) - (1-y) * ln_1_ye(ye)) 
+'''    
+J_log = lambda y, ye: sum(- y * np.log(ye) - (1-y) * np.log(1-ye))
+'''
 def J_log(y, ye):
     jl = 0
     for i, j in zip(y, ye):
         if i == 0.:
-            jl = jl - np.log(1-j)
+            if j == 1.:
+                jl = jl - np.float('inf')
+            else:
+                jl = jl - np.log(1-j)
         if i == 1.:
-            jl = jl - np.log(j)
-    return j 
+            if j == 0.:
+                jl = jl - np.float('inf')
+            else:
+                jl = jl - np.log(j)
+         
+    return jl
+'''
 # MLE
 
 class simple_logistic:
@@ -180,11 +211,13 @@ class simple_logistic:
     
     # train neuron
     def train(self):
-        # import optimization package
+        # import optimization package and warnings...
         from scipy.optimize import minimize
+        from warnings import filterwarnings
         # weights hypothesis
         self.w = np.zeros(self.x_data.shape[1]+1)
         # optimize 
+        filterwarnings('ignore')
         temp = lambda w: self.logistic_cost(w)
         self.w = minimize(temp, self.w, method='bfgs', jac = True).x
     
@@ -203,6 +236,11 @@ class simple_logistic:
         self.y_estimate = self.y_estimate.rename(columns = {'probability':'y_estimate'})
         if retr_n:
             return self.y_estimate
+            
+    def mse_perform(self):
+        y = self.y_data.values
+        ye = self.y_estimate.values.reshape((len(y), ))
+        return perform(y, ye)
 '''    
 # example 
 x1 = 10 * np.random.rand(100)
