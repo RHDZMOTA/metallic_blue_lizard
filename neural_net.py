@@ -350,7 +350,11 @@ class competitive_neurons:
         self.y_vect = y.T.tolist()
         self.y = pd.DataFrame({'y':[vect2ind(x) for x in self.y_vect]})
         ne_rons = np.unique(self.y)
-        self.clusters = ne_rons 
+        self.clusters = ne_rons
+        
+        # run cost function
+        self.cost_function(rt_rn = False)
+        
         if print_results:
             print('Neurons that found a cluster: {}'.format(ne_rons))
     
@@ -362,18 +366,33 @@ class competitive_neurons:
         group_sum = np.zeros(len(n_urons))
         # initialize element vector (number of elements in cluster)
         group_elm = np.zeros(len(n_urons))
+        # save values for each group
+        clusters_elements = [[] for i in range(len(n_urons))]
         
         for i in range(self.x_data.shape[0]):
+            # identify neurone
             neurone = np.int(self.y.values[i][0])
+            # identify position 
             neurone = vect2ind(n_urons == neurone)
-            x = self.x_data.values[0]
+            # extract x value
+            x = self.x_data.values[i]
+            # extract w value 
             extract_w = self.w.columns[self.w.columns == neurone]
             w = np.array(self.w[extract_w].values.T.tolist()[0])
+            # sum and elm
             group_sum[neurone] = group_sum[neurone] + np.linalg.norm(x - w)
             group_elm[neurone] = group_elm[neurone] + 1
+            # save data 
+            clusters_elements[neurone].append(x)
         
+        # save cluster's size and elements 
+        self.clusters_size = np.asarray(group_elm)
+        self.clusters_elements = np.asarray(clusters_elements)
+        # calculate general mean (j)
         group_mean = group_sum / group_elm
         j = np.mean(group_mean)
+        
+        # save and return 
         self.cost = j
         if rt_rn:
             return j
