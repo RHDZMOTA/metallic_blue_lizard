@@ -368,6 +368,7 @@ class competitive_neurons:
         group_elm = np.zeros(len(n_urons))
         # save values for each group
         clusters_elements = [[] for i in range(len(n_urons))]
+        clusters_elements_index = [[] for i in range(len(n_urons))]
         
         for i in range(self.x_data.shape[0]):
             # identify neurone
@@ -384,10 +385,13 @@ class competitive_neurons:
             group_elm[neurone] = group_elm[neurone] + 1
             # save data 
             clusters_elements[neurone].append(x)
+            # save data index
+            clusters_elements_index[neurone].append(self.x_data.index[i])
         
         # save cluster's size and elements 
         self.clusters_size = np.asarray(group_elm)
         self.clusters_elements = np.asarray(clusters_elements)
+        self.clusters_elements_index = np.asarray(clusters_elements_index)
         # calculate general mean (j)
         group_mean = group_sum / group_elm
         j = np.mean(group_mean)
