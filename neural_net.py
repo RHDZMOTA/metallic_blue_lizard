@@ -37,7 +37,7 @@ def add_ones(x):
     cols = list(x.columns.values)
     x['_bias'] = 1
     x    = x[ ['_bias'] + cols]
-    return x
+    return x.values
 
 # sigmoid / tanh / linear
 sigmoid = lambda x: 1 / (1 + np.exp(-x))
@@ -68,11 +68,11 @@ class adaline:
         Train neuron.
         '''
         # x data
-        x = self.x_data.copy()
+        x = self.x_data.values
         x = add_ones(x)
-        x = np.matrix(x)
+        x = np.asmatrix(x)
         # expected resutl
-        y = np.matrix(self.y_data.copy())
+        y = np.asmatrix(self.y_data.values)
         # calculate weights 
         w = np.linalg.inv(x.T * x) * x.T * y
         self.w = w
@@ -291,10 +291,15 @@ class competitive_neurons:
         # dim of the data 
         dim_data = self.x_data.shape[1]
         # initial random weights 
-        if set_weights != False:
+        if type(set_weights) == type(np.array([])):
             w = set_weights
         else:
             w = np.random.rand(dim_data, self.neurons)
+            for i in range(dim_data):
+                m_x = self.x_data.max(0)[i]
+                m_n = self.x_data.min(0)[i]
+                rng = m_x - m_n
+                w[i] = w[i] * rng + m_n
         w = np.asmatrix(w)
         # data matrix 
         X = np.asmatrix(self.x_data.values)
